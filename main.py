@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Example bot that returns a synchronous response."""
-
 from flask import Flask, request, json
 
 app = Flask(__name__)
@@ -8,16 +6,30 @@ app = Flask(__name__)
 
 @app.route('/', methods=['POST'])
 def on_event():
-    """Handles an event from Hangouts Chat."""
+    text = ''
     event = request.get_json()
-    if event['type'] == 'ADDED_TO_SPACE' and event['space']['type'] == 'ROOM':
-        text = 'Thanks for adding me to "%s"!' % event['space']['displayName']
+
+    print(event)
+
+    username = event['user']['displayName']
+
+    if event['type'] == 'ADDED_TO_SPACE':
+        if event['space']['type'] == 'ROOM':
+            room_name = event['space']['displayName']
+            text = '"%s"에 초대해줘서 고맙다!' % room_name
+        elif event['space']['type'] == 'DM':
+            text = '안녕 "%s"!' % username
+
     elif event['type'] == 'MESSAGE':
-        text = 'You said: `%s`' % event['message']['text']
-    else:
-        return
+        if event['space']['type'] == 'ROOM':
+            message = event['message']['argumentText'].lstrip()
+            text = '%s이(가) `%s`(이)라고 말했어.' % (username, message)
+        elif event['space']['type'] == 'DM':
+            message = event['message']['text']
+            text = '넌 이렇게 말했지.. "%s"' % message
+
     return json.jsonify({'text': text})
 
 
 if __name__ == '__main__':
-    app.run(port=8080, debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=True)
