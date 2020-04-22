@@ -1,4 +1,4 @@
-# Incomming webhook 예제
+# Incoming webhook 예제
 
 ## 사용법
 ```shell script
